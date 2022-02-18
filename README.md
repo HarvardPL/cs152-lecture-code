@@ -1,2 +1,1 @@
-# cs152-lecture-code
-Code from CS152 lectures
+# Code from [CS152](https://groups.seas.harvard.edu/courses/cs152) lectures
