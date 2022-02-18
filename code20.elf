@@ -1,0 +1,54 @@
+% echo -e "loadFile boolvec.elf" | ../../twelf/bin/twelf-server
+
+bool: type.
+true: bool.
+false: bool.
+
+nat: type.
+z: nat.
+s: nat -> nat.
+
+plus : nat -> nat -> nat -> type.
+plus/z : plus z N N.
+plus/s : plus N1 N2 N3 -> plus (s N1) N2 (s N3).
+
+lt: nat -> nat -> type.
+lt/z: lt z (s N).
+lt/s: lt (s N1) (s N2) <- lt N1 N2.
+
+boolvec: nat -> type.
+boolvec/z: boolvec z.
+boolvec/s: boolvec N -> bool -> boolvec (s N).
+
+init: {N: nat} bool -> boolvec N -> type.
+%mode init +N +B -V.
+init/z : init z B boolvec/z.
+init/s : init (s N) B (boolvec/s V B)
+   <- init N B V.
+%worlds () (init _ _ _).
+%total N (init N _ _).
+
+index: {I: nat} {N: nat} {P: lt I N} boolvec N -> bool -> type.
+%mode index +I +N +P +V -B.
+index/z: index z (s N) P (boolvec/s V B) B.
+index/s: index (s I) (s N) (lt/s P) (boolvec/s V B) BR
+         <- index I N P V BR.
+%worlds () (index _ _ _ _ _).
+%total I (index I _ _ _ _).
+
+%query * 1 index z (s z) P (boolvec/s boolvec/z true) B.
+%query * 1 index z (s N) P (boolvec/s boolvec/z true) B.
+%query * 1 index z (s N) P V B.
+% %query * 1 index z z P (boolvec/s boolvec/z true) B.
+% %query * 1 index z z P V B.
+%query * 1 index z N P (boolvec/s boolvec/z true) B.
+%query * 3 index I N P V B.
+%query * 1 init (s (s z)) true V.
+
+proof-index-init: init N B V -> lt I N -> index I N P V B -> type.
+%mode proof-index-init +T +P +X.
+-/z: proof-index-init T lt/z X.
+-/s: proof-index-init (init/s T) (lt/s P) (index/s X)
+     <- proof-index-init T P X.
+%worlds () (proof-index-init _ _ _).
+%total P (proof-index-init _ P _).
