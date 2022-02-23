@@ -29,7 +29,7 @@
   (reduction-relation
    λcbn
    (--> (in-hole E ((λ (x) e) e_2))
-        (in-hole E (subst x v e_2))
+        (in-hole E (subst x e_2 e))
         "β")))
 
 (define-metafunction λ
