@@ -1,4 +1,4 @@
-This is a literate haskell file, tested in GHC 7.8.2. to GHC 8.10.4.
+This is a literate haskell file, tested in GHC 7.8.2. to GHC 8.10.7.
 If you are running an earlier version that does not support EmptyCase,
 you can remove it from the language extensions required below and
 replace the definition of abort below to "cheat" by using an
