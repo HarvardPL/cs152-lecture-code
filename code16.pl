@@ -7,15 +7,15 @@ ty(G,a(M,N),Res) :- ty(G,M,Fun), ty(G,N,Arg),
 
 /*
 ?- ty([],l(x,v(x)),T).
-T = to(_1140, _1140) ;
+T = to(_A, _A) ;
 false.
 
 ?- ty([],l(x,a(v(x),v(x))),T).
 false.
 
 ?- ty([],T,to(x,x)).
-T = l(_4410, v(_4410)) .
+T = l(_A, v(_A)) .
 
 ?- ty([],l(x,l(y,v(x))),T).
-T = to(_5908, to(_5926, _5908)) .
+T = to(_A, to(_, _A)) .
 */
