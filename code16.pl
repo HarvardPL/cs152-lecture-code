@@ -1,21 +1,37 @@
 in((X,A),G) :- member((X,A),G), !.
 
-ty(G,v(X),A) :- in((X,A),G).
-ty(G,l(X,M),to(A,B)) :- ty([(X,A)|G],M,B).
-ty(G,a(M,N),Res) :- ty(G,M,Fun), ty(G,N,Arg),
+ty(G,var(X),A) :- in((X,A),G).
+ty(G,lam(X,M),to(A,B)) :- ty([(X,A)|G],M,B).
+ty(G,app(M,N),Res) :- ty(G,M,Fun), ty(G,N,Arg),
   unify_with_occurs_check(Fun,to(Arg,Res)).
 
 /*
-?- ty([],l(x,v(x)),T).
+?- ty([],lam(x,var(x)),T).
+
+?- ty([],lam(x,a(var(x),var(x))),T).
+
+?- ty([],T,to(x,x)).
+
+?- ty([],lam(x,lam(y,var(x))),T).
+*/
+
+
+
+
+
+
+/*
+?- ty([],lam(x,var(x)),T).
 T = to(_A, _A) ;
 false.
 
-?- ty([],l(x,a(v(x),v(x))),T).
+?- ty([],lam(x,a(var(x),var(x))),T).
 false.
 
 ?- ty([],T,to(x,x)).
-T = l(_A, v(_A)) .
+T = lam(_A, var(_A)) .
 
-?- ty([],l(x,l(y,v(x))),T).
-T = to(_A, to(_, _A)) .
+?- ty([],lam(x,lam(y,var(x))),T).
+T = to(_A, to(_, _A)) ;
+false.
 */
