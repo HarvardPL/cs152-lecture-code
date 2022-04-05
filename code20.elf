@@ -1,4 +1,4 @@
-% echo -e "loadFile boolvec.elf" | ../../twelf/bin/twelf-server
+echo -e "loadFile code20.elf" | ../twelf/bin/twelf-server
 
 bool: type.
 true: bool.
