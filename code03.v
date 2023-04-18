@@ -153,7 +153,8 @@ Proof.
       destruct IHstep1 as [e1' [s' IHstep1]].
       repeat eexists.
       eapply SSLMul. eapply IHstep1.
-  - right.
+  - (* EAsg *)
+    right.
     destruct (IHe1 s) as [IHval1 | IHstep1].
     + destruct IHval1 as [n1 IHval1].
       subst.
