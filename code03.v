@@ -106,34 +106,45 @@ Theorem progress :
     (exists n, EInt n = e) \/
     (exists e' s', (e, s) --> (e', s')).
 Proof.
-  intro e. induction e; intro s.
+  intro e.
+  induction e; intro s.
+  (* we prove the property, a disjunction, by structural induction on the expression e *)
   - (* Var *)
     right.
     exists (EInt (s v)). exists s.
     eapply SSVar.
+    (* by the Var axiom, we can evaluate (x,s) to (s v,s),
+       so (e,s) takes a step *)
   - (* Int *)
     left.
     exists i.
     reflexivity.
+    (* e is an int, so we're trivially on the left the property to show *)
   - (* EAdd *)
     right.
+    (* we will show the right of the propert *)
+    (* by induction hypotheses, we have IHe1 and IHe2
+       we must inspect several subcase *)
     destruct (IHe1 s) as [IHval1 | IHstep1].
     + destruct IHval1 as [n1 IHval1].
       destruct (IHe2 s) as [IHval2 | IHstep2].
-      * (* e1 value, e2, value *)
+      * (* case: e1 value, e2, value *)
         destruct IHval2 as [n2 IHval2].
         subst.
         repeat eexists.
         eapply SSAdd.
-      *  (* e1 value, e2 steps *)
+        (* by Add *)
+      *  (* case: e1 value, e2 steps *)
         destruct IHstep2 as [e2' [s' IHstep2]].
         subst.
         repeat eexists.
         eapply SSRAdd. eapply IHstep2.
-    + (* e1 steps *)
+        (* by RAdd, and e2 stepping *)
+    + (* case: e1 steps *)
       destruct IHstep1 as [e1' [s' IHstep1]].
       repeat eexists.
       eapply SSLAdd. eapply IHstep1.
+      (* by LAdd, and e1 stepping *)
   - (* EMul *)
     right.
     destruct (IHe1 s) as [IHval1 | IHstep1].
