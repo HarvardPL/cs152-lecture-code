@@ -109,7 +109,7 @@ Proof.
   intro e. induction e; intro s.
   - (* Var *)
     right.
-    eexists. exists s.
+    exists (EInt (s v)). exists s.
     eapply SSVar.
   - (* Int *)
     left.
