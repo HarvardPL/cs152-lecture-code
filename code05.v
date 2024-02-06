@@ -206,7 +206,7 @@ Proof.
   destruct H as [s' H].
   dependent induction H.
   - inversion H.
-    (* Contradiction: `true` does not evaluate to false. *)
+    (* Contradiction: <true,s> does not evaluate to false. *)
   - eapply IHCLStep2. reflexivity.
     (* By the IH for the evaluation of <While true skip,s>. *)
 Qed.
