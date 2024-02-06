@@ -179,18 +179,34 @@ Qed.
    assuming non-stuck *)
 Theorem infinite_SS: forall s, ~exists s',
   CSStep (CWhile Btrue CSkip, s) (CSkip, s').
+  (* For any s, there exists no s', such that
+    <While true skip, s> --> <skip, s'> *)
 Proof.                           
-  intros. unfold "~". intros.
+  intros. unfold "~".
+  (* We need to show that
+     for any s,
+     (there exists s', such that <While true skip, s> --> <skip, s'>)
+     implies a contradiction. *)
+  intros.
   destruct H as [s' H].
-  dependent induction H.
+  (* Call H the statement <While true skip, s> --> <skip, s'> .*)
+  inversion H.
+  (* By inversion, nothing is left. *)
 Qed.
 
 Theorem infinite_LS: forall s, ~exists s',
   CLStep (CWhile Btrue CSkip, s) s'.
+  (* for any s, <While true skip,s> does not take a large step. *)
 Proof.
   intros. unfold "~". intros.
+  (* We need to show that
+     for any s,
+     (While true skip takes a large step)
+     implies a contradiction. *)
   destruct H as [s' H].
   dependent induction H.
   - inversion H.
+    (* Contradiction: `true` does not evaluate to false. *)
   - eapply IHCLStep2. reflexivity.
+    (* By the IH for the evaluation of <While true skip,s>. *)
 Qed.
