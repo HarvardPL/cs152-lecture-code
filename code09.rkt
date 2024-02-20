@@ -71,3 +71,16 @@
 'cbn
 (apply-reduction-relation cbn (term ((λ (x) x) (λ (x) x))))
 (apply-reduction-relation cbn (term ((λ (t) (λ (f) t)) ((λ (x) x) (λ (x) x)))))
+
+;;(traces cbv (term ((λ (t) (λ (f) t)) ((λ (x) x) (λ (x) x)))))
+
+(define value? (redex-match λ v))
+(define (single-step? e)
+  (= (length (apply-reduction-relation cbv e))
+     1))
+(redex-check λ
+             e
+             (or
+              (redex-match λ x)
+              (value? (term e))
+              (single-step? (term e))))
