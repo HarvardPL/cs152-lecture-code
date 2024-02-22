@@ -58,3 +58,44 @@ let search tree predicate =
   dfs tree predicate (fun x -> x) (fun () -> raise Not_Found);;
 
 search (Node (Leaf 1, (Node (Leaf 2, Leaf 3)))) (fun n -> n mod 2 == 0);;
+
+(* basic factorial example *)
+let rec fact n =
+  if n <= 0
+  then 1
+  else n * (fact (n-1));;
+
+let rec fact_iter n a =
+  if n <= 0
+  then a
+  else (fact_iter (n-1) (n*a));;
+
+let rec fact_cps n k =
+  if n <= 0
+  then k 1
+  else (fact_cps (n-1) (fun r -> k (n*r)));;
+
+(* product example *)
+
+let rec product xs = match xs with
+  | [] -> 1
+  | x::xs -> x * product xs;;
+
+let rec product_cps xs k = match xs with
+  | [] -> k 1
+  | x::xs -> product_cps xs (fun r -> k (x * r));;
+
+#trace product_cps;;
+
+product_cps [1;2;0;4;5;6;7;8] (fun v -> v);;
+
+let rec product_cps0 xs top k = match xs with
+  | [] -> k 1
+  | 0::_ -> top 0
+  | x::xs -> product_cps0 xs top (fun r -> k (x * r));;
+
+#trace product_cps0;;
+
+product_cps0 [1;2;0;4;5;6;7;8] (fun v -> v) (fun v -> v);;
+
+let product_cps0_interface xs k =  product_cps0 xs k k;;
