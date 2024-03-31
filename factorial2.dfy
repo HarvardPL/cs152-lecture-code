@@ -11,8 +11,8 @@ method factorial(n: nat) returns (y: nat)
     assert y * Factorial(x) == Factorial(n);
     assert x >= 0;
     while (x != 0)
-        invariant y * Factorial(x) == Factorial(n);
-        decreases x;
+        invariant y * Factorial(x) == Factorial(n)
+        decreases x
     {
         assert (x-1) >= 0;
         assert y * x * Factorial(x-1) == Factorial(n);

@@ -9,9 +9,9 @@ method factorial(n: nat) returns (r: nat)
     r := 1;
     var i := 0;
     while (i != n)
-        invariant r == Factorial(i);
-        invariant i <= n;
-        decreases n-i;
+        invariant r == Factorial(i)
+        invariant i <= n
+        decreases n-i
     {
         i := i + 1;
         r := r * i;
