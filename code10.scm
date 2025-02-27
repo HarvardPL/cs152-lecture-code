@@ -22,6 +22,12 @@
 
 ;;; Continuation-Passing Style
 
+;;; Gateway drug of program transformations:
+;;; Since it ensures a program has useful properties, such as:
+;;; - all serious calls being in tail position,
+;;; - all arguments to calls are simple,
+;;; - fix order of evaluation.
+
 ;;; direct-style
 (define factorial
   (lambda (n)
@@ -94,6 +100,16 @@
 
 ;;; Trampolining
 
+;;; We cannot trampoline without CPSing first,
+;;; because the non-tail calls must return the expected type, not a procedure.
+;;; For example, with Fibonacci, the + call would get confused getting procedures (thunks).
+
+;;; When compiling to C, CPS by itself does not guarantee a bounded stack.
+;;; Trampolining is one solution.
+
+;;; Just wrap a thunk around the body of the CPSed function.
+;;; Now, the driver needs to keep applying the returned thunk until it's not a procedure anymore.
+
 (define factorial-cps
   (lambda (n k)
     (lambda ()
@@ -101,6 +117,9 @@
           (k 1)
           (factorial-cps (- n 1) (lambda (v)
                                    (k (* n v))))))))
+
+;;; Instead of grossly thunking the whole body, we can be more fine-grained about it.
+;;; Only need to thunk parts that consume unbounded stack.
 
 (define factorial-cps
   (lambda (n k)
