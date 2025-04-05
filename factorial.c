@@ -1,4 +1,4 @@
-// frama-c -wp -wp-prover CVC4 factorial.c
+// frama-c -wp -wp-prover CVC5 factorial.c
 // fails because of overflow
 
 /*@

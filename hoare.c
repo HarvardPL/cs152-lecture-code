@@ -1,4 +1,4 @@
-// frama-c -wp -wp-rte -wp-prover CVC4 hoare.c
+// frama-c -wp -wp-rte -wp-prover CVC5 hoare.c
 
 #include <limits.h>
 
