@@ -3,7 +3,7 @@ inductive Expr where
   | const : Int → Expr                 -- Constants like 5
   | var : String → Expr                -- Variables like "x"
   | add : Expr → Expr → Expr           -- Addition (e₁ + e₂)
-  | mul : Expr → Expr → Expr           -- Multiplication (e₁ + e₂)
+  | mul : Expr → Expr → Expr           -- Multiplication (e₁ * e₂)
   deriving Repr
 
 -- Environment type (maps variable names to values)
