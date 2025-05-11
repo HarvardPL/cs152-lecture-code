@@ -16,7 +16,7 @@ def evaluate : Expr → Env → Int
   | Expr.add e₁ e₂, env => evaluate e₁ env + evaluate e₂ env  -- Addition evaluates recursively
   | Expr.mul e₁ e₂, env => evaluate e₁ env * evaluate e₂ env  -- Multiplication evaluates recursively too
 
--- Optimizer to remove additions by 0, multiplication by 1, and simplifies multiplication by 0
+-- Optimizer to remove additions by 0 & multiplication by 1, and to simplify multiplication by 0
 def optimize : Expr → Expr
   | Expr.const n => Expr.const n       -- Constants remain unchanged
   | Expr.var x => Expr.var x           -- Variables remain unchanged
