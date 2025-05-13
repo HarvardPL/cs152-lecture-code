@@ -46,7 +46,7 @@ set_option grind.warning false
 theorem optimize_preserves_semantics (e : Expr) (env : Env) :
   evaluate (optimize e) env = evaluate e env := by
   induction e <;> simp [optimize, evaluate]
-  <;> grind +ring [evaluate, optimize]
+  <;> grind +ring [optimize, evaluate]
 
 -- Predicate defining an optimally optimized expression
 def optimal : Expr → Bool
