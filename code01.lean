@@ -63,8 +63,34 @@ def optimal : Expr → Bool
   | Expr.mul _ (Expr.const 1) => false
   | Expr.mul e₁ e₂ => optimal e₁ && optimal e₂
 
-theorem optimize_optimal (e : Expr) (env : Env) :
+theorem optimize_optimal (e : Expr) :
   optimal (optimize e) := by
-  induction e <;> simp [optimal, optimize, evaluate]
-  · sorry -- addition
-  · sorry -- multiplication
+  induction e
+  case const n =>
+    simp [optimize, optimal]
+  case var x =>
+    simp [optimize, optimal]
+  case add e₁ e₂ h₁ h₂ =>
+    simp [optimal, optimize]
+    split <;> intros
+    · simp [optimal]
+    · rw [h₂]
+    · rw [h₁]
+    · simp [optimal, optimize]
+      rw [h₁, h₂]
+      apply And.intro
+        rfl
+        rfl
+  case mul e₁ e₂ h₁ h₂ =>
+    simp [optimal, optimize]
+    split <;> intros
+    · simp [optimal]
+    · simp [optimal]
+    · simp [optimal]
+    · rw [h₂]
+    · rw [h₁]
+    · simp [optimal, optimize]
+      rw [h₁, h₂]
+      apply And.intro
+        rfl
+        rfl
