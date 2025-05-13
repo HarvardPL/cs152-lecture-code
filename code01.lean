@@ -1,3 +1,5 @@
+-- Thanks to Arthur Adjedj for helping with the proofs
+
 -- Datatype for arithmetic expressions
 inductive Expr where
   | const : Int → Expr                 -- Constants like 5
@@ -41,7 +43,6 @@ def optimize : Expr → Expr
 
 
 -- Theorem: optimizer preserves semantics
--- Thanks to Arthur Adjedj for pointing out the new grind tactic
 set_option grind.warning false
 theorem optimize_preserves_semantics (e : Expr) (env : Env) :
   evaluate (optimize e) env = evaluate e env := by
@@ -63,7 +64,7 @@ def optimal : Expr → Bool
   | Expr.mul _ (Expr.const 1) => false
   | Expr.mul e₁ e₂ => optimal e₁ && optimal e₂
 
--- Thanks to Arthur Adjedj for automating the proof
+-- Theorem: optimizer produces optimital expressions
 theorem optimize_optimal (e : Expr) :
   optimal (optimize e) := by
   induction e <;> simp [optimize, optimal] <;> split <;> simp [optimal, *]
