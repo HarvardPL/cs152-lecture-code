@@ -24,6 +24,7 @@ def optimize : Expr → Expr
     let e₁' := optimize e₁
     let e₂' := optimize e₂
     match e₁', e₂' with
+    | Expr.const n₁, Expr.const n₂ => Expr.const (n₁ + n₂)
     | Expr.const 0, e => e            -- 0 + e => e
     | e, Expr.const 0 => e            -- e + 0 => e
     | _, _ => Expr.add e₁' e₂'        -- Otherwise keep the optimized addition
@@ -31,116 +32,39 @@ def optimize : Expr → Expr
     let e₁' := optimize e₁
     let e₂' := optimize e₂
     match e₁', e₂' with
+    | Expr.const n₁, Expr.const n₂ => Expr.const (n₁ * n₂)
     | Expr.const 0, _ => Expr.const 0 -- 0 * e => 0
     | _, Expr.const 0 => Expr.const 0 -- e * 0 => 0
     | Expr.const 1, e => e            -- 1 * e => e
     | e, Expr.const 1 => e            -- e * 1 => e
     | _, _ => Expr.mul e₁' e₂'        -- Otherwise keep the optimized multiplication
 
+
 -- Theorem: optimizer preserves semantics
+-- Thanks to Arthur Adjedj for pointing out the new grind tactic
+set_option grind.warning false
 theorem optimize_preserves_semantics (e : Expr) (env : Env) :
   evaluate (optimize e) env = evaluate e env := by
-  induction e with
-  | const n =>
-    -- Case: e = const n
-    simp [optimize, evaluate]
+  induction e <;> simp [optimize, evaluate]
+  <;> grind (config := {  ring := true }) [evaluate, optimize]
 
-  | var x =>
-    -- Case: e = var x
-    simp [optimize, evaluate]
+-- Predicate defining an optimally optimized expression
+def optimal : Expr → Bool
+  | Expr.const _ => true
+  | Expr.var _ => true
+  | Expr.add (Expr.const _) (Expr.const _) => false
+  | Expr.add (Expr.const 0) _ => false
+  | Expr.add _ (Expr.const 0) => false
+  | Expr.add e₁ e₂ => optimal e₁ && optimal e₂
+  | Expr.mul (Expr.const _) (Expr.const _) => false
+  | Expr.mul (Expr.const 0) _ => false
+  | Expr.mul _ (Expr.const 0) => false
+  | Expr.mul (Expr.const 1) _ => false
+  | Expr.mul _ (Expr.const 1) => false
+  | Expr.mul e₁ e₂ => optimal e₁ && optimal e₂
 
-  | add e₁ e₂ ih₁ ih₂ =>
-    -- Case: e = e₁ + e₂
-    simp [optimize]
-
-    -- Use induction hypotheses
-    have h₁ : evaluate (optimize e₁) env = evaluate e₁ env := ih₁
-    have h₂ : evaluate (optimize e₂) env = evaluate e₂ env := ih₂
-
-    -- Analyze all possible cases of optimize e₁ and optimize e₂
-    simp [evaluate]
-
-    -- Split into cases based on whether optimize e₁ is 0
-    by_cases h_e1_zero : optimize e₁ = Expr.const 0
-    · -- Case: optimize e₁ = 0
-      simp [h_e1_zero, evaluate]
-      -- Now optimize (e₁ + e₂) = optimize e₂
-      rw [h₂]
-      -- And evaluate e₁ = 0
-      have : evaluate e₁ env = 0 := by
-        rw [← h₁, h_e1_zero]
-        simp [evaluate]
-      rw [this]
-      simp
-
-    -- Split into cases based on whether optimize e₂ is 0
-    by_cases h_e2_zero : optimize e₂ = Expr.const 0
-    · -- Case: optimize e₂ = 0
-      simp [h_e2_zero, evaluate]
-      -- Now optimize (e₁ + e₂) = optimize e₁
-      rw [h₁]
-      -- And evaluate e₂ = 0
-      have : evaluate e₂ env = 0 := by
-        rw [← h₂, h_e2_zero]
-        simp [evaluate]
-      rw [this]
-      simp
-
-    -- General case: neither is zero
-    -- Now we know optimize (e₁ + e₂) = Expr.add (optimize e₁) (optimize e₂)
-    simp [evaluate]
-    rw [h₁, h₂]
-
-  | mul e₁ e₂ ih₁ ih₂ =>
-    -- Case: e = e₁ * e₂
-    simp [optimize]
-
-    -- Use induction hypotheses
-    have h₁ : evaluate (optimize e₁) env = evaluate e₁ env := ih₁
-    have h₂ : evaluate (optimize e₂) env = evaluate e₂ env := ih₂
-
-    -- Analyze all possible cases of optimize e₁ and optimize e₂
-    simp [evaluate]
-
-    -- Split into cases based on whether optimize e₁ is 0
-    by_cases h_e1_zero : optimize e₁ = Expr.const 0
-    · -- Case: optimize e₁ = 0
-      simp [h_e1_zero, evaluate]
-      rw [← h₁]
-      rw [h_e1_zero]
-      simp [evaluate]
-
-    -- Split into cases based on whether optimize e₂ is 0
-    by_cases h_e2_zero : optimize e₂ = Expr.const 0
-    · -- Case: optimize e₂ = 0
-      simp [h_e2_zero, evaluate]
-      rw [← h₂]
-      rw [h_e2_zero]
-      simp [evaluate]
-
-    -- Split into cases based on whether optimize e₁ is 1
-    by_cases h_e1_one : optimize e₁ = Expr.const 1
-    · -- Case: optimize e₁ = 1
-      simp [h_e1_one, evaluate]
-      rw [h₂]
-      have : evaluate e₁ env = 1 := by
-        rw [← h₁, h_e1_one]
-        simp [evaluate]
-      rw [this]
-      simp
-
-    -- Split into cases based on whether optimize e₂ is 1
-    by_cases h_e2_one : optimize e₂ = Expr.const 1
-    · -- Case: optimize e₂ = 1
-      simp [h_e2_one, evaluate]
-      rw [h₁]
-      have : evaluate e₂ env = 1 := by
-        rw [← h₂, h_e2_one]
-        simp [evaluate]
-      rw [this]
-      simp
-
-    -- General case:
-    -- Now we know optimize (e₁ * e₂) = Expr.mul (optimize e₁) (optimize e₂)
-    simp [evaluate]
-    rw [h₁, h₂]
+theorem optimize_optimal (e : Expr) (env : Env) :
+  optimal (optimize e) := by
+  induction e <;> simp [optimal, optimize, evaluate]
+  · sorry -- addition
+  · sorry -- multiplication
