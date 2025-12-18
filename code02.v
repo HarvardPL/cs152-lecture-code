@@ -1,5 +1,5 @@
-From Coq Require Import ZArith.ZArith.
-From Coq Require Import Strings.String.
+From Stdlib Require Import ZArith.ZArith.
+From Stdlib Require Import Strings.String.
 Open Scope string_scope.
 
 Definition Var := string.

@@ -1,6 +1,6 @@
-From Coq Require Import ZArith.ZArith.
-From Coq Require Import Strings.String.
-From Coq Require Import Program.Equality.
+From Stdlib Require Import ZArith.ZArith.
+From Stdlib Require Import Strings.String.
+From Stdlib Require Import Program.Equality.
 
 Definition Var := string.
 Definition Var_eq := String.eqb.
