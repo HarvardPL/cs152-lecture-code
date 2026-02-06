@@ -16,19 +16,22 @@ function compile(e: exp): seq<instr>
     case EMul(e1, e2) => compile(e1) + compile(e2) + [IMul]
 }
 
-// Execute stack machine code
-function exec(code: seq<instr>, stk: seq<int>, env: string -> int): seq<int>
+// Execute stack machine code, returning None on stack underflow
+function exec(code: seq<instr>, stk: seq<int>, env: string -> int): Option<seq<int>>
     decreases code
 {
-    if code == [] then stk
+    if code == [] then Some(stk)
     else match code[0]
         case IPush(v) => exec(code[1..], [v] + stk, env)
         case ILoad(x) => exec(code[1..], [env(x)] + stk, env)
-        case IAdd => if |stk| >= 2 then exec(code[1..], [stk[1] + stk[0]] + stk[2..], env) else stk
-        case IMul => if |stk| >= 2 then exec(code[1..], [stk[1] * stk[0]] + stk[2..], env) else stk
+        case IAdd => if |stk| >= 2 then exec(code[1..], [stk[1] + stk[0]] + stk[2..], env) else None
+        case IMul => if |stk| >= 2 then exec(code[1..], [stk[1] * stk[0]] + stk[2..], env) else None
 }
 
+datatype Option<T> = None | Some(val: T)
+
 // Key insight: parameterize by continuation c to avoid separate composition lemma
+// The theorem says: compiled code succeeds AND produces the right result
 lemma CompileCorrect(e: exp, c: seq<instr>, stk: seq<int>, env: string -> int)
     ensures exec(compile(e) + c, stk, env) == exec(c, [eval(e, env)] + stk, env)
 {
@@ -47,12 +50,13 @@ lemma CompileCorrect(e: exp, c: seq<instr>, stk: seq<int>, env: string -> int)
         assert [eval(e2, env)] + ([v1] + stk) == [eval(e2, env), v1] + stk;
 }
 
-// Main theorem: compiled code evaluates correctly
+// Main theorem: compiled code succeeds and evaluates correctly
 lemma CompilerCorrect(e: exp, env: string -> int)
-    ensures exec(compile(e), [], env) == [eval(e, env)]
+    ensures exec(compile(e), [], env) == Some([eval(e, env)])
 {
     CompileCorrect(e, [], [], env);
     assert compile(e) + [] == compile(e);
+    assert [eval(e, env)] + [] == [eval(e, env)];
 }
 
 // Without automatic induction, explicit recursive calls are required
@@ -79,11 +83,11 @@ lemma {:induction false} CompileCorrectManual(e: exp, c: seq<instr>, stk: seq<in
 }
 
 // Concrete example: 2 + (3 * 4) = 14
-lemma {:timeLimit 30} Example()
+lemma {:timeLimit 50} Example()
 {
     var e := EAdd(EInt(2), EMul(EInt(3), EInt(4)));
     var env: string -> int := _ => 0;
     assert compile(e) == [IPush(2), IPush(3), IPush(4), IMul, IAdd];
     CompilerCorrect(e, env);
-    assert exec(compile(e), [], env) == [14];
+    assert exec(compile(e), [], env) == Some([14]);
 }
