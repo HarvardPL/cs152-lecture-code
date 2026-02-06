@@ -35,15 +35,6 @@ function optimize(e: exp): exp
 lemma OptimizerPreservesSemantics(e: exp, env: string -> int)
 ensures eval(optimize(e), env) == eval(e, env)
 {
-    match e
-    case EVar(x) =>
-    case EInt(v) =>
-    case EAdd(e1, e2) =>
-        OptimizerPreservesSemantics(e1, env);
-        OptimizerPreservesSemantics(e2, env);
-    case EMul(e1, e2) =>
-        OptimizerPreservesSemantics(e1, env);
-        OptimizerPreservesSemantics(e2, env);
 }
 
 function optimal(e: exp): bool
