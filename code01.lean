@@ -68,3 +68,88 @@ def optimal : Expr → Bool
 theorem optimize_optimal (e : Expr) :
   optimal (optimize e) := by
   induction e <;> simp [optimize, optimal] <;> split <;> simp [optimal, *]
+
+-- Compiler correctness proof for a stack machine
+-- See also: https://xavierleroy.org/courses/EUTypes-2019/
+
+-- Stack machine instructions
+inductive Instr where
+  | push : Int → Instr        -- Push a constant onto the stack
+  | load : String → Instr     -- Load a variable onto the stack
+  | add : Instr               -- Pop two values, push their sum
+  | mul : Instr               -- Pop two values, push their product
+  deriving Repr
+
+-- Compile expression to stack machine code
+def compile : Expr → List Instr
+  | Expr.const n => [Instr.push n]
+  | Expr.var x => [Instr.load x]
+  | Expr.add e₁ e₂ => compile e₁ ++ compile e₂ ++ [Instr.add]
+  | Expr.mul e₁ e₂ => compile e₁ ++ compile e₂ ++ [Instr.mul]
+
+-- Execute stack machine code, returning None on stack underflow
+def exec : List Instr → List Int → Env → Option (List Int)
+  | [], stk, _ => some stk
+  | Instr.push v :: code, stk, env => exec code (v :: stk) env
+  | Instr.load x :: code, stk, env => exec code (env x :: stk) env
+  | Instr.add :: code, v₂ :: v₁ :: stk, env => exec code ((v₁ + v₂) :: stk) env
+  | Instr.mul :: code, v₂ :: v₁ :: stk, env => exec code ((v₁ * v₂) :: stk) env
+  | Instr.add :: _, _, _ => none  -- Stack underflow
+  | Instr.mul :: _, _, _ => none  -- Stack underflow
+
+-- Key lemma: exec distributes over code concatenation
+theorem exec_append (code₁ code₂ : List Instr) (stk : List Int) (env : Env) :
+  exec (code₁ ++ code₂) stk env =
+    match exec code₁ stk env with
+    | some stk' => exec code₂ stk' env
+    | none => none := by
+  induction code₁ generalizing stk with
+  | nil => simp [exec]
+  | cons instr code₁ ih =>
+    cases instr with
+    | push v => simp [exec, ih]
+    | load x => simp [exec, ih]
+    | add =>
+      cases stk with
+      | nil => simp [exec]
+      | cons v₂ stk' =>
+        cases stk' with
+        | nil => simp [exec]
+        | cons v₁ stk'' => simp [exec, ih]
+    | mul =>
+      cases stk with
+      | nil => simp [exec]
+      | cons v₂ stk' =>
+        cases stk' with
+        | nil => simp [exec]
+        | cons v₁ stk'' => simp [exec, ih]
+
+-- Key insight: compile preserves semantics with any continuation stack
+theorem compile_correct (e : Expr) (code : List Instr) (stk : List Int) (env : Env) :
+  exec (compile e ++ code) stk env = exec code (evaluate e env :: stk) env := by
+  induction e generalizing code stk with
+  | const n => simp [compile, exec, evaluate]
+  | var x => simp [compile, exec, evaluate]
+  | add e₁ e₂ ih₁ ih₂ =>
+    simp only [compile, evaluate, List.append_assoc]
+    rw [ih₁]
+    rw [ih₂]
+    simp [exec]
+  | mul e₁ e₂ ih₁ ih₂ =>
+    simp only [compile, evaluate, List.append_assoc]
+    rw [ih₁]
+    rw [ih₂]
+    simp [exec]
+
+-- Main theorem: compiled code succeeds and evaluates correctly
+theorem compiler_correct (e : Expr) (env : Env) :
+  exec (compile e) [] env = some [evaluate e env] := by
+  have h := compile_correct e [] [] env
+  simp at h
+  exact h
+
+-- Concrete example: 2 + (3 * 4) = 14
+#eval
+  let e := Expr.add (Expr.const 2) (Expr.mul (Expr.const 3) (Expr.const 4))
+  let env : Env := fun _ => 0
+  (compile e, exec (compile e) [] env, evaluate e env)
