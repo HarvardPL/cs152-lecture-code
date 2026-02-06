@@ -16,6 +16,8 @@ function compile(e: exp): seq<instr>
     case EMul(e1, e2) => compile(e1) + compile(e2) + [IMul]
 }
 
+datatype Option<T> = None | Some(val: T)
+
 // Execute stack machine code, returning None on stack underflow
 function exec(code: seq<instr>, stk: seq<int>, env: string -> int): Option<seq<int>>
     decreases code
@@ -27,8 +29,6 @@ function exec(code: seq<instr>, stk: seq<int>, env: string -> int): Option<seq<i
         case IAdd => if |stk| >= 2 then exec(code[1..], [stk[1] + stk[0]] + stk[2..], env) else None
         case IMul => if |stk| >= 2 then exec(code[1..], [stk[1] * stk[0]] + stk[2..], env) else None
 }
-
-datatype Option<T> = None | Some(val: T)
 
 // Key insight: parameterize by continuation c to avoid separate composition lemma
 lemma CompileCorrect(e: exp, c: seq<instr>, stk: seq<int>, env: string -> int)
