@@ -1,3 +1,12 @@
+// Compiler correctness proof for a stack machine
+//
+// The continuation-passing proof style originates from:
+//   Xavier Leroy. "Formal verification of a realistic compiler."
+//   Communications of the ACM, 52(7):107-115, 2009.
+//   https://xavierleroy.org/publi/compcert-CACM.pdf
+//
+// See also: https://xavierleroy.org/courses/EUTypes-2019/
+
 include "code01.dfy"
 
 // Stack machine instructions
@@ -73,4 +82,14 @@ lemma {:induction false} CompileCorrectManual(e: exp, c: seq<instr>, stk: seq<in
         assert compile(e2) + [IMul] + c == compile(e2) + ([IMul] + c);
         CompileCorrectManual(e2, [IMul] + c, [v1] + stk, env);
         assert [eval(e2, env)] + ([v1] + stk) == [eval(e2, env), v1] + stk;
+}
+
+// Concrete example: 2 + (3 * 4) = 14
+lemma Example()
+{
+    var e := EAdd(EInt(2), EMul(EInt(3), EInt(4)));
+    var env: string -> int := _ => 0;
+    assert compile(e) == [IPush(2), IPush(3), IPush(4), IMul, IAdd];
+    CompilerCorrect(e, env);
+    assert exec(compile(e), [], env) == [14];
 }
