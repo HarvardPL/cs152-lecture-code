@@ -51,3 +51,26 @@ lemma CompilerCorrect(e: exp, env: string -> int)
     CompileCorrect(e, [], [], env);
     assert compile(e) + [] == compile(e);
 }
+
+// Without automatic induction, explicit recursive calls are required
+lemma {:induction false} CompileCorrectManual(e: exp, c: seq<instr>, stk: seq<int>, env: string -> int)
+    ensures exec(compile(e) + c, stk, env) == exec(c, [eval(e, env)] + stk, env)
+{
+    match e
+    case EVar(x) =>
+    case EInt(v) =>
+    case EAdd(e1, e2) =>
+        var v1 := eval(e1, env);
+        assert compile(e) + c == compile(e1) + (compile(e2) + [IAdd] + c);
+        CompileCorrectManual(e1, compile(e2) + [IAdd] + c, stk, env);
+        assert compile(e2) + [IAdd] + c == compile(e2) + ([IAdd] + c);
+        CompileCorrectManual(e2, [IAdd] + c, [v1] + stk, env);
+        assert [eval(e2, env)] + ([v1] + stk) == [eval(e2, env), v1] + stk;
+    case EMul(e1, e2) =>
+        var v1 := eval(e1, env);
+        assert compile(e) + c == compile(e1) + (compile(e2) + [IMul] + c);
+        CompileCorrectManual(e1, compile(e2) + [IMul] + c, stk, env);
+        assert compile(e2) + [IMul] + c == compile(e2) + ([IMul] + c);
+        CompileCorrectManual(e2, [IMul] + c, [v1] + stk, env);
+        assert [eval(e2, env)] + ([v1] + stk) == [eval(e2, env), v1] + stk;
+}
