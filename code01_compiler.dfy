@@ -1,10 +1,4 @@
 // Compiler correctness proof for a stack machine
-//
-// The continuation-passing proof style originates from:
-//   Xavier Leroy. "Formal verification of a realistic compiler."
-//   Communications of the ACM, 52(7):107-115, 2009.
-//   https://xavierleroy.org/publi/compcert-CACM.pdf
-//
 // See also: https://xavierleroy.org/courses/EUTypes-2019/
 
 include "code01.dfy"
