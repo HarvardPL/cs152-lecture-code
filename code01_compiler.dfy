@@ -31,7 +31,6 @@ function exec(code: seq<instr>, stk: seq<int>, env: string -> int): Option<seq<i
 datatype Option<T> = None | Some(val: T)
 
 // Key insight: parameterize by continuation c to avoid separate composition lemma
-// The theorem says: compiled code succeeds AND produces the right result
 lemma CompileCorrect(e: exp, c: seq<instr>, stk: seq<int>, env: string -> int)
     ensures exec(compile(e) + c, stk, env) == exec(c, [eval(e, env)] + stk, env)
 {
