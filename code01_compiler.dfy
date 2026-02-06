@@ -85,7 +85,7 @@ lemma {:induction false} CompileCorrectManual(e: exp, c: seq<instr>, stk: seq<in
 }
 
 // Concrete example: 2 + (3 * 4) = 14
-lemma Example()
+lemma {:timeLimit 30} Example()
 {
     var e := EAdd(EInt(2), EMul(EInt(3), EInt(4)));
     var env: string -> int := _ => 0;
