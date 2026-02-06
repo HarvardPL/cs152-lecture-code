@@ -34,17 +34,13 @@ lemma CompileCorrect(e: exp, c: seq<instr>, stk: seq<int>, env: string -> int)
     case EInt(v) =>
     case EAdd(e1, e2) =>
         var v1 := eval(e1, env);
-        assert compile(e) + c == compile(e1) + (compile(e2) + [IAdd] + c);  // seq assoc
-        CompileCorrect(e1, compile(e2) + [IAdd] + c, stk, env);
-        assert compile(e2) + [IAdd] + c == compile(e2) + ([IAdd] + c);      // seq assoc
-        CompileCorrect(e2, [IAdd] + c, [v1] + stk, env);
-        assert [eval(e2, env)] + ([v1] + stk) == [eval(e2, env), v1] + stk; // stack shape
+        assert compile(e) + c == compile(e1) + (compile(e2) + [IAdd] + c);
+        assert compile(e2) + [IAdd] + c == compile(e2) + ([IAdd] + c);
+        assert [eval(e2, env)] + ([v1] + stk) == [eval(e2, env), v1] + stk;
     case EMul(e1, e2) =>
         var v1 := eval(e1, env);
         assert compile(e) + c == compile(e1) + (compile(e2) + [IMul] + c);
-        CompileCorrect(e1, compile(e2) + [IMul] + c, stk, env);
         assert compile(e2) + [IMul] + c == compile(e2) + ([IMul] + c);
-        CompileCorrect(e2, [IMul] + c, [v1] + stk, env);
         assert [eval(e2, env)] + ([v1] + stk) == [eval(e2, env), v1] + stk;
 }
 
