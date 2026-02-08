@@ -13,7 +13,7 @@ function optimize(e: exp): exp
     case EAdd(e1, e2) => EAdd(optimize(e1), optimize(e2))
 }
 
-function optimal(e: exp): bool
+function {:spec} optimal(e: exp): bool
 {
     match e
     case EVar(_) => true
