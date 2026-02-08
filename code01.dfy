@@ -1,14 +1,14 @@
 datatype exp =
-| EVar(x: string)
 | EInt(v: int)
+| EVar(x: string)
 | EAdd(e1: exp, e2: exp)
 | EMul(e1: exp, e2: exp)
 
 function eval(e: exp, env: string -> int): int
 {
     match e
-    case EVar(x) => env(x)
     case EInt(v) => v
+    case EVar(x) => env(x)
     case EAdd(e1, e2) => eval(e1, env) + eval(e2, env)
     case EMul(e1, e2) => eval(e1, env) * eval(e2, env)
 }
@@ -16,8 +16,8 @@ function eval(e: exp, env: string -> int): int
 function optimize(e: exp): exp
 {
     match e
-    case EVar(x) => e
     case EInt(v) => e
+    case EVar(x) => e
     case EAdd(e1, e2) => (match (optimize(e1), optimize(e2))
         case (EInt(v1), EInt(v2)) => EInt(v1+v2)
         case (EInt(0), e2) => e2
@@ -40,8 +40,8 @@ ensures eval(optimize(e), env) == eval(e, env)
 function optimal(e: exp): bool
 {
     match e
-    case EVar(_) => true
     case EInt(_) => true
+    case EVar(_) => true
     case EAdd(EInt(_), EInt(_)) => false
     case EAdd(EInt(0), _) => false
     case EAdd(_, EInt(0)) => false
@@ -57,4 +57,19 @@ function optimal(e: exp): bool
 lemma OptimizerIsOptimal(e: exp)
 ensures optimal(optimize(e))
 {
+    // Structural induction on e
+    match e {
+        case EInt(v) => {
+        }
+        case EVar(x) => {
+        }
+        case EAdd(e1, e2) => {
+            OptimizerIsOptimal(e1);
+            OptimizerIsOptimal(e2);
+        }
+        case EMul(e1, e2) => {
+            OptimizerIsOptimal(e1);
+            OptimizerIsOptimal(e2);
+        }
+    }
 }
