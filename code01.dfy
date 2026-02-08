@@ -37,7 +37,7 @@ ensures eval(optimize(e), env) == eval(e, env)
 {
 }
 
-function optimal(e: exp): bool
+function {:spec} optimal(e: exp): bool
 {
     match e
     case EInt(_) => true
