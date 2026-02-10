@@ -3,6 +3,14 @@ datatype exp =
 | EVar(x: string)
 | EAdd(e1: exp, e2: exp)
 
+function eval(e: exp, env: string -> int): int
+{
+    match e
+    case EInt(v) => v
+    case EVar(x) => env(x)
+    case EAdd(e1, e2) => eval(e1, env) + eval(e2, env)
+}
+
 function optimize(e: exp): exp
 {
     match e
@@ -13,7 +21,12 @@ function optimize(e: exp): exp
     case EAdd(e1, e2) => EAdd(optimize(e1), optimize(e2))
 }
 
-function {:spec} optimal(e: exp): bool
+lemma OptimizerPreservesSemantics(e: exp, env: string -> int)
+ensures eval(optimize(e), env) == eval(e, env)
+{
+}
+
+predicate {:spec} optimal(e: exp)
 {
     match e
     case EInt(_) => true
