@@ -26,10 +26,10 @@ From iris.prelude Require Import options.
         *b
     }
 
-    fn main() {
+    fn main() -> i32 {
         let b = Box::new(41);
         let x = increment_then_return(b);
-        consume(x);
+        consume(x)
     }
 
  *)
