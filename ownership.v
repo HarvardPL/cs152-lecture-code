@@ -29,7 +29,7 @@ From iris.prelude Require Import options.
     fn main() {
         let b = Box::new(41);
         let x = increment_then_return(b);
-        let y = consume(x);
+        consume(x);
     }
 
  *)
