@@ -127,6 +127,17 @@
         (lambda () (k 1))
         (lambda () (factorial-cps (- n 1) (lambda (v)
                                        (k (* n v))))))))
+
+(define-syntax while
+  (syntax-rules ()
+    ((_ c b r)
+     (let loop ()
+       (if c
+           (begin
+             b
+             (loop))
+           r)))))
+
 (define factorial
   (lambda (n)
     (let ((r (factorial-cps n (lambda (v) v))))
